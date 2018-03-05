@@ -37,22 +37,21 @@ namespace DnDSalesBot.Data_Access_Layer
 			}
 			catch(SQLiteException e)
 			{
-				throw new Exception(e.Message);
-			}
-			finally
-			{
 				connection.Close();
+				throw new Exception(e.Message);
 			}
 
 			return rtn;
         }
 
-		public SQLiteDataReader GetPlayer(ulong playerDescriptor)
+		public SQLiteDataReader GetPlayer(int playerDescriptor)
 		{
 			SQLiteDataReader rtn;
 			SQLiteParameter param = new SQLiteParameter("@playerDescriptor");
 
-			string sql = "SELECT * FROM Player WHERE playerDescriptor = @playerDescriptor";
+			param.Value = playerDescriptor;
+
+			string sql = "SELECT * FROM Players WHERE playerDescriptor LIKE @playerDescriptor";
 
 			SQLiteCommand command = new SQLiteCommand(sql, connection);
 			command.Parameters.Add(param);
@@ -64,11 +63,8 @@ namespace DnDSalesBot.Data_Access_Layer
 			}
 			catch(SQLiteException e)
 			{
-				throw new Exception(e.Message);
-			}
-			finally
-			{
 				connection.Close();
+				throw new Exception(e.Message);
 			}
 
 			return rtn;

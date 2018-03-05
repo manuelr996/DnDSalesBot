@@ -11,7 +11,7 @@ namespace DnDSalesBot.Object_Layer
 		#region Properties
 		public string PlayerName { get; set; }
 
-		public ulong PlayerDescriptor { get; set; }
+		public int PlayerDescriptor { get; set; }
 
 		public ulong PlayerJournalId { get; set; }
 
@@ -26,10 +26,7 @@ namespace DnDSalesBot.Object_Layer
 			Character = new Character();
 		}
 
-
-
-
-		public Player GetFromDatabase(ulong descriptor)
+		public static Player GetFromDatabase(int descriptor)
 		{
 			Player result = new Player();
 			DatabaseHandler db = new DatabaseHandler();
@@ -37,7 +34,10 @@ namespace DnDSalesBot.Object_Layer
 
 			if (values.HasRows && values.Read())
 			{
-				result.Character.Name = 
+				result.Character.Name = ((string)values["characterName"]);
+				result.PlayerName = ((string)values["playerName"]);
+				result.PlayerJournalId = ulong.Parse((string) values["journalId"]);
+				result.PlayerDescriptor = ((int) values["playerDescriptor"]);
 			}
 			else
 				result = null;
@@ -45,7 +45,7 @@ namespace DnDSalesBot.Object_Layer
 			if (!values.IsClosed)
 				values.Close();
 
-
+			return result;
 		}
 	}
 }

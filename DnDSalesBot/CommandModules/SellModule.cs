@@ -8,10 +8,8 @@ using Discord;
 namespace DnDSalesBot.CommandModules
 {
     class SellModule : ModuleBase
-    {
-        private IServiceProvider services;
-
-        [Command("Sell"),Summary("Sell an Item")]
+	{
+		[Command("Sell"),Summary("Sell an Item")]
         public async Task SellItem()
         {
 			await ReplyAsync("WIP");

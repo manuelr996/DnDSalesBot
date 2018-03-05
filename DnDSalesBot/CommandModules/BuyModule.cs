@@ -14,21 +14,26 @@ namespace DnDSalesBot.CommandModules
         {
 			String reply = String.Empty;
 			Item item = Item.GetFromDatabase(itemName);
+			Player buyer = Player.GetFromDatabase(Context.User.DiscriminatorValue);
 			string shortDate = DateTime.Now.ToShortDateString();
-			ulong dmChannel = 0;
 
-			ulong.TryParse(ConfigurationManager.AppSettings["dmChannel"], out dmChannel);
-			//await ReplyAsync("WIP");
+			//Get the DM channel from the App.Config
+			ulong.TryParse(ConfigurationManager.AppSettings["dmChannel"], out ulong dmChannel);
+
 
 			if (item != null)
 			{
-				reply = String.Format("[{0}]: {1} compro **{2}** por **{3}** Coronas", shortDate, Context.User.Mention, item.itemName, item.itemPrice);
+				//Format the Reply
+				reply = String.Format("[{0}]: {1} compro **{2}** por **{3}** :crown:", shortDate, Context.User.Mention, item.ItemName, item.ItemPrice);
 
 				if (dmChannel != 0)
+					//if the DM channel was parsed successfully then reply to the DM channel
 					SendMessageAsync(dmChannel, reply);
 				else
+					//if not then throw an exception
 					throw new Exception("bad configuration format please check App.Config");
 
+				SendMessageAsync(buyer.PlayerJournalId, reply);
 				//TODO: Notify player Journal
 				//TODO: Log to database
 				await ReplyAsync(reply);
@@ -50,6 +55,7 @@ namespace DnDSalesBot.CommandModules
 		[Command("buy"), Summary("Buy an item listed in the database")]
 		public async Task BuyItem() =>
 			await ReplyAsync("Wrong Usage: please specify the item you want to buy");
+
 
 
 		private async void SendMessageAsync(ulong chatId, string message)

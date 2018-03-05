@@ -8,26 +8,26 @@ namespace DnDSalesBot.Object_Layer
 {
     class Item
     {
-        public string itemName { get; set; }
-        public decimal itemPrice { get; set; }
+        public string ItemName { get; set; }
+        public double ItemPrice { get; set; }
         
         #region Constructors
-        public Item(string name, decimal price = 0)
+        public Item(string name, double price = 0)
         {
-            itemName = name;
-            itemPrice = price;
+            ItemName = name;
+            ItemPrice = price;
         }
 
         public Item()
         {
-            itemName = string.Empty;
-            itemPrice = 0;
+            ItemName = string.Empty;
+            ItemPrice = 0;
         }
 
         public Item(Item copyItem)
         {
-            itemName = copyItem.itemName;
-            itemPrice = copyItem.itemPrice;
+            ItemName = copyItem.ItemName;
+            ItemPrice = copyItem.ItemPrice;
         }
         #endregion
 
@@ -39,8 +39,8 @@ namespace DnDSalesBot.Object_Layer
 
             if (values.HasRows && values.Read())
             {
-                result.itemName = itemName;
-                result.itemPrice = ((decimal)values["itemPrice"]);
+                result.ItemName = itemName;
+                result.ItemPrice = ((double)values["itemPrice"]);
             }
             else
                 result = null;
