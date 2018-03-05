@@ -9,11 +9,11 @@ namespace DnDSalesBot.Object_Layer
     class Player
     {
         #region Properties
-        public string PlayerName { get; set; }
+        public string Name { get; set; }
 
-        public ushort PlayerDiscriminator { get; set; }
+        public ushort Discriminator { get; set; }
 
-        public ulong PlayerJournalId { get; set; }
+        public ulong JournalId { get; set; }
 
         public Character Character { get; set; }
 
@@ -22,9 +22,9 @@ namespace DnDSalesBot.Object_Layer
 
 		public Player()
 		{
-			PlayerName = string.Empty;
-			PlayerDiscriminator = 0;
-			PlayerJournalId = 0;
+			Name = string.Empty;
+			Discriminator = 0;
+			JournalId = 0;
 			Character = new Character();
 		}
 
@@ -37,9 +37,9 @@ namespace DnDSalesBot.Object_Layer
 			if (values.HasRows && values.Read())
 			{
 				result.Character.Name = ((string)values["characterName"]);
-				result.PlayerName = ((string)values["playerName"]);
-				result.PlayerJournalId = ulong.Parse((string) values["journalId"]);
-				result.PlayerDiscriminator = Convert.ToUInt16((values["playerDescriptor"]));
+				result.Name = ((string)values["playerName"]);
+				result.JournalId = ulong.Parse((string) values["journalId"]);
+				result.Discriminator = Convert.ToUInt16((values["playerDiscriminator"]));
                 result.IsDm = ((bool)values["isDM"]);
 			}
 			else
@@ -47,6 +47,14 @@ namespace DnDSalesBot.Object_Layer
 
 			if (!values.IsClosed)
 				values.Close();
+
+			return result;
+		}
+
+		public static bool AddToDatabase(Player newPlayer)
+		{
+			DatabaseHandler db = new DatabaseHandler();
+			bool result = db.InsertPlayer(newPlayer.Name, newPlayer.Character.Name, newPlayer.Discriminator, newPlayer.JournalId);
 
 			return result;
 		}

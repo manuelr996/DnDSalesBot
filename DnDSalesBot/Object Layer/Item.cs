@@ -8,11 +8,13 @@ namespace DnDSalesBot.Object_Layer
 {
     class Item
     {
-        public string ItemName { get; set; }
+		#region Properties
+		public string ItemName { get; set; }
         public double ItemPrice { get; set; }
-        
-        #region Constructors
-        public Item(string name, double price = 0)
+		#endregion
+		
+		#region Constructors
+		public Item(string name, double price = 0)
         {
             ItemName = name;
             ItemPrice = price;

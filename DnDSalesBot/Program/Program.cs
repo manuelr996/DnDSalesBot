@@ -94,7 +94,7 @@ namespace DnDSalesBot
 			await commands.AddModuleAsync<SellModule>();
 			await commands.AddModuleAsync<AddItemModule>();
 			await commands.AddModuleAsync<AddPlayerModule>();
-			//await commands.AddModuleAsync<>();
+			await commands.AddModuleAsync<HelpModule>();
 			//await commands.AddModuleAsync<>();
 		}
 	}

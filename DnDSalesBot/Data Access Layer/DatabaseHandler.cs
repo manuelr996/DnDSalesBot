@@ -10,18 +10,19 @@ using System.Text;
 
 namespace DnDSalesBot.Data_Access_Layer
 {
-    class DatabaseHandler
-    {
-        private SQLiteConnection connection;
+	class DatabaseHandler
+	{
+		private SQLiteConnection connection;
 
-        public DatabaseHandler()
-        {
-            connection = new SQLiteConnection(ConfigurationManager.AppSettings["connectionString"]);
-        }
+		public DatabaseHandler()
+		{
+			connection = new SQLiteConnection(ConfigurationManager.AppSettings["connectionString"]);
+		}
 
-        public SQLiteDataReader GetItemPrice(string itemName)
-        {
-            SQLiteDataReader rtn;
+		#region Item
+		public SQLiteDataReader GetItemPrice(string itemName)
+		{
+			SQLiteDataReader rtn;
 			SQLiteParameter param = new SQLiteParameter("@itemName");
 
 			param.Value = itemName;
@@ -35,52 +36,54 @@ namespace DnDSalesBot.Data_Access_Layer
 				connection.Open();
 				rtn = command.ExecuteReader();
 			}
-			catch(SQLiteException e)
+			catch (SQLiteException e)
 			{
 				connection.Close();
 				throw new Exception(e.Message);
 			}
 
 			return rtn;
-        }
+		}
 
-        public bool InsertItem(string itemName, double itemPrice)
-        {
-            SQLiteParameter name = new SQLiteParameter("@itemName");
-            SQLiteParameter price = new SQLiteParameter("@itemPrice");
-            bool rtn;
+		public bool InsertItem(string itemName, double itemPrice)
+		{
+			SQLiteParameter name = new SQLiteParameter("@itemName");
+			SQLiteParameter price = new SQLiteParameter("@itemPrice");
+			bool result;
 
-            name.Value = itemName;
-            price.Value = itemPrice;
+			name.Value = itemName;
+			price.Value = itemPrice;
 
-            string sql = "INSERT INTO items (itemName, itemPrice) VALUES (@itemName, @itemPrice)";
+			string sql = "INSERT INTO items (itemName, itemPrice) VALUES (@itemName, @itemPrice)";
 
-            SQLiteCommand command = new SQLiteCommand(sql, connection);
-            command.Parameters.Add(name);
-            command.Parameters.Add(price);
+			SQLiteCommand command = new SQLiteCommand(sql, connection);
+			command.Parameters.Add(name);
+			command.Parameters.Add(price);
 
-            try
-            {
-                connection.Open();
-                rtn = (command.ExecuteNonQuery() >= 1 ? true : false );
-            }
-            catch(SQLiteException e)
-            {
-                connection.Close();
-                throw new Exception(e.Message);
-            }
+			try
+			{
+				connection.Open();
+				result = (command.ExecuteNonQuery() >= 1 ? true : false);
+			}
+			catch (SQLiteException e)
+			{
+				connection.Close();
+				throw new Exception(e.Message);
+			}
 
-            return rtn;
-        }
+			return result;
+		}
+		#endregion
 
-		public SQLiteDataReader GetPlayer(int playerDescriptor)
+		#region Player
+		public SQLiteDataReader GetPlayer(int playerDiscriminator)
 		{
 			SQLiteDataReader rtn;
-			SQLiteParameter param = new SQLiteParameter("@playerDescriptor");
+			SQLiteParameter param = new SQLiteParameter("@playerDiscriminator");
 
-			param.Value = playerDescriptor;
+			param.Value = playerDiscriminator;
 
-			string sql = "SELECT * FROM Players WHERE playerDescriptor LIKE @playerDescriptor";
+			string sql = "SELECT * FROM Players WHERE playerDiscriminator LIKE @playerDiscriminator";
 
 			SQLiteCommand command = new SQLiteCommand(sql, connection);
 			command.Parameters.Add(param);
@@ -90,7 +93,7 @@ namespace DnDSalesBot.Data_Access_Layer
 				connection.Open();
 				rtn = command.ExecuteReader();
 			}
-			catch(SQLiteException e)
+			catch (SQLiteException e)
 			{
 				connection.Close();
 				throw new Exception(e.Message);
@@ -98,5 +101,65 @@ namespace DnDSalesBot.Data_Access_Layer
 
 			return rtn;
 		}
+
+		public bool InsertPlayer(string playerName, string characterName, ushort playerDiscriminator, ulong journalId)
+		{
+			bool result;
+
+			SQLiteParameter plrName = new SQLiteParameter("@playerName") { Value = playerName };
+			SQLiteParameter chrName = new SQLiteParameter("@characterName") { Value = characterName };
+			SQLiteParameter discriminator = new SQLiteParameter("@playerDiscriminator") { Value = Convert.ToInt32(playerDiscriminator) };
+			SQLiteParameter jrnlId = new SQLiteParameter("@journalId") { Value = journalId.ToString() };
+
+
+			string sql = "INSERT INTO Players (playerName, characterName, playerDiscriminator, isDm, journalId)" +
+							"VALUES (@playerName , @characterName, @playerDiscriminator, 0, @journalId);";
+
+			SQLiteCommand command = new SQLiteCommand(sql, connection);
+			command.Parameters.Add(plrName);
+			command.Parameters.Add(chrName);
+			command.Parameters.Add(discriminator);
+			command.Parameters.Add(jrnlId);
+
+			try
+			{
+				connection.Open();
+				result = ((command.ExecuteNonQuery()) >= 1 ? true : false);
+			}
+			catch (SQLiteException e)
+			{
+				connection.Close();
+				throw new Exception(e.Message);
+			}
+
+			return result;
+		}
+
+		public bool UpdateDM(bool isDm, ushort playerDiscriminator)
+		{
+			bool result;
+			SQLiteParameter dmFlag = new SQLiteParameter("@isDm");
+			SQLiteParameter discriminator = new SQLiteParameter("@playerDiscriminator");
+			dmFlag.Value = isDm;
+			discriminator.Value = Convert.ToInt32(playerDiscriminator);
+
+			string sql = "Update Players Set isDm = @isDm where playerDiscriminator like @playerDiscriminator";
+
+			SQLiteCommand command = new SQLiteCommand(sql, connection);
+
+			try
+			{
+				connection.Open();
+				result = (command.ExecuteNonQuery() >= 1 ? true : false);
+			}
+			catch(SQLiteException e)
+			{
+				connection.Close();
+				throw new Exception(e.Message);
+			}
+
+			return result;
+		}
+		#endregion
 	}
 }
