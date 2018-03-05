@@ -31,6 +31,14 @@ namespace DnDSalesBot.Object_Layer
         }
         #endregion
 
+        public static bool AddToDatabase(string itemName, double itemPrice)
+        {
+            DatabaseHandler db = new DatabaseHandler();
+            bool result = db.InsertItem(itemName, itemPrice);
+
+            return result;
+        }
+
         public static Item GetFromDatabase(string itemName)
         {
             Item result = new Item();

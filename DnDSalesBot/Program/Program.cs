@@ -29,8 +29,6 @@ namespace DnDSalesBot
 
             services = new ServiceCollection().BuildServiceProvider();
 
-          
-
             try
             {
                 await InstallCommands();
@@ -65,8 +63,21 @@ namespace DnDSalesBot
                     CommandContext context = new CommandContext(client, msg);
 					IResult result = await commands.ExecuteAsync(context, argPos, services);
 					if (!result.IsSuccess)
-						log = new LogMessage(LogSeverity.Error, result.Error.Value.ToString(), result.ErrorReason);
-					else
+                    {
+                        log = new LogMessage(LogSeverity.Error, result.Error.Value.ToString(), result.ErrorReason);
+
+                        switch(result.Error.Value)
+                        {
+                            case CommandError.BadArgCount:
+                                await message.Channel.SendMessageAsync("Argument amount is wrong");
+                                break;
+                            case CommandError.UnknownCommand:
+                                await message.Channel.SendMessageAsync("Command unknown refer to !help");
+                                break;
+                        }
+                       
+                    }
+                    else
 						log = new LogMessage(LogSeverity.Info, "Command", message.Content);
 
 					Console.WriteLine(log.ToString());

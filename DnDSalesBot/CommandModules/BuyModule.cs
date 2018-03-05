@@ -3,7 +3,7 @@ using System.Configuration;
 using System.Threading.Tasks;
 using DnDSalesBot.Object_Layer;
 using Discord.Commands;
-using Discord;
+
 
 namespace DnDSalesBot.CommandModules
 {
@@ -12,10 +12,9 @@ namespace DnDSalesBot.CommandModules
         [Command("buy"), Summary("Buy an item listed in the database")]
         public async Task BuyItem([Remainder, Summary("The Item desired to buy")]string itemName)
         {
-			String reply = String.Empty;
-			Item item = Item.GetFromDatabase(itemName);
+			String reply = String.Empty, shortDate = DateTime.Now.ToShortDateString();
+            Item item = Item.GetFromDatabase(itemName);
 			Player buyer = Player.GetFromDatabase(Context.User.DiscriminatorValue);
-			string shortDate = DateTime.Now.ToShortDateString();
 
 			//Get the DM channel from the App.Config
 			ulong.TryParse(ConfigurationManager.AppSettings["dmChannel"], out ulong dmChannel);
@@ -28,13 +27,12 @@ namespace DnDSalesBot.CommandModules
 
 				if (dmChannel != 0)
 					//if the DM channel was parsed successfully then reply to the DM channel
-					SendMessageAsync(dmChannel, reply);
+					Utilities.SendMessageAsync(Context, dmChannel, reply);
 				else
 					//if not then throw an exception
 					throw new Exception("bad configuration format please check App.Config");
 
-				SendMessageAsync(buyer.PlayerJournalId, reply);
-				//TODO: Notify player Journal
+				Utilities.SendMessageAsync(Context, buyer.PlayerJournalId, reply);
 				//TODO: Log to database
 				await ReplyAsync(reply);
 			}
@@ -44,7 +42,7 @@ namespace DnDSalesBot.CommandModules
 				string replyDm = String.Format("[{0}]: No se encontro el item: **{1}**\nPara añadir utilice el comando addItem", shortDate, itemName);
 
 				if (dmChannel != 0)
-					SendMessageAsync(dmChannel, replyDm);
+					Utilities.SendMessageAsync(Context, dmChannel, replyDm);
 
 				await ReplyAsync(reply);
 				//TODO: Log to database
@@ -56,13 +54,5 @@ namespace DnDSalesBot.CommandModules
 		public async Task BuyItem() =>
 			await ReplyAsync("Wrong Usage: please specify the item you want to buy");
 
-
-
-		private async void SendMessageAsync(ulong chatId, string message)
-		{
-			IMessageChannel channel = await Context.Guild.GetTextChannelAsync(chatId);
-
-			await channel.SendMessageAsync(message);
-		}
     }
 }

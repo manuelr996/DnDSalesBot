@@ -44,6 +44,35 @@ namespace DnDSalesBot.Data_Access_Layer
 			return rtn;
         }
 
+        public bool InsertItem(string itemName, double itemPrice)
+        {
+            SQLiteParameter name = new SQLiteParameter("@itemName");
+            SQLiteParameter price = new SQLiteParameter("@itemPrice");
+            bool rtn;
+
+            name.Value = itemName;
+            price.Value = itemPrice;
+
+            string sql = "INSERT INTO items (itemName, itemPrice) VALUES (@itemName, @itemPrice)";
+
+            SQLiteCommand command = new SQLiteCommand(sql, connection);
+            command.Parameters.Add(name);
+            command.Parameters.Add(price);
+
+            try
+            {
+                connection.Open();
+                rtn = (command.ExecuteNonQuery() >= 1 ? true : false );
+            }
+            catch(SQLiteException e)
+            {
+                connection.Close();
+                throw new Exception(e.Message);
+            }
+
+            return rtn;
+        }
+
 		public SQLiteDataReader GetPlayer(int playerDescriptor)
 		{
 			SQLiteDataReader rtn;

@@ -8,25 +8,27 @@ namespace DnDSalesBot.Object_Layer
 {
     class Player
     {
-		#region Properties
-		public string PlayerName { get; set; }
+        #region Properties
+        public string PlayerName { get; set; }
 
-		public int PlayerDescriptor { get; set; }
+        public ushort PlayerDiscriminator { get; set; }
 
-		public ulong PlayerJournalId { get; set; }
+        public ulong PlayerJournalId { get; set; }
 
-		public Character Character { get; set; }
+        public Character Character { get; set; }
+
+        public bool IsDm { get; set; }
 		#endregion
 
 		public Player()
 		{
 			PlayerName = string.Empty;
-			PlayerDescriptor = 0;
+			PlayerDiscriminator = 0;
 			PlayerJournalId = 0;
 			Character = new Character();
 		}
 
-		public static Player GetFromDatabase(int descriptor)
+		public static Player GetFromDatabase(ushort descriptor)
 		{
 			Player result = new Player();
 			DatabaseHandler db = new DatabaseHandler();
@@ -37,7 +39,8 @@ namespace DnDSalesBot.Object_Layer
 				result.Character.Name = ((string)values["characterName"]);
 				result.PlayerName = ((string)values["playerName"]);
 				result.PlayerJournalId = ulong.Parse((string) values["journalId"]);
-				result.PlayerDescriptor = ((int) values["playerDescriptor"]);
+				result.PlayerDiscriminator = Convert.ToUInt16((values["playerDescriptor"]));
+                result.IsDm = ((bool)values["isDM"]);
 			}
 			else
 				result = null;
