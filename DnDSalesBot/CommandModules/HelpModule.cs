@@ -8,6 +8,7 @@ namespace DnDSalesBot.CommandModules
 {
 	class HelpModule : ModuleBase
 	{
+		#region Privates
 		private CommandService _service;
 	
 		private async void InitializeService()
@@ -18,8 +19,11 @@ namespace DnDSalesBot.CommandModules
 			await _service.AddModuleAsync<AddItemModule>();
 			await _service.AddModuleAsync<AddPlayerModule>();
 			await _service.AddModuleAsync<HelpModule>();
+			await _service.AddModuleAsync<MakeDmModule>();
 		}
+		#endregion
 
+		#region Commands
 		[Command("Help"), Summary("Muestra el texto de ayuda para todos los comandos")]
 		public async Task Help()
 		{
@@ -68,7 +72,8 @@ namespace DnDSalesBot.CommandModules
 
 				await ReplyAsync(answer);
 			}
-
+			
 		}
+		#endregion
 	}
 }

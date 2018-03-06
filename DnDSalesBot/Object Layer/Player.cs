@@ -28,6 +28,29 @@ namespace DnDSalesBot.Object_Layer
 			Character = new Character();
 		}
 
+		public bool UpdateDM(bool isDm)
+		{
+			DatabaseHandler db = new DatabaseHandler();
+			bool result;
+			if(result = db.UpdateDM(isDm, this.Discriminator))
+				this.IsDm = isDm;
+
+			return result;
+
+		}
+		
+		public bool AddGold(double goldAmount)
+		{
+			DatabaseHandler db = new DatabaseHandler();
+			bool result;
+
+			if(result = db.UpdateGold(goldAmount, this.Discriminator))
+				this.Character.CurrentGold += goldAmount;
+
+			return result;
+		}
+
+		#region Static Methods
 		public static Player GetFromDatabase(ushort descriptor)
 		{
 			Player result = new Player();
@@ -37,6 +60,7 @@ namespace DnDSalesBot.Object_Layer
 			if (values.HasRows && values.Read())
 			{
 				result.Character.Name = ((string)values["characterName"]);
+				result.Character.CurrentGold = ((double) values["currentGold"]);
 				result.Name = ((string)values["playerName"]);
 				result.JournalId = ulong.Parse((string) values["journalId"]);
 				result.Discriminator = Convert.ToUInt16((values["playerDiscriminator"]));
@@ -58,5 +82,6 @@ namespace DnDSalesBot.Object_Layer
 
 			return result;
 		}
+		#endregion
 	}
 }

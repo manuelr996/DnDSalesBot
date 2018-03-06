@@ -12,7 +12,7 @@ namespace DnDSalesBot.Object_Layer
 
 		public int Level { get; set; }
 
-		public float CurrentGold { get; set; }
+		public double CurrentGold { get; set; }
 
 		public Character()
 		{

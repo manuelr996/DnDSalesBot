@@ -58,8 +58,8 @@ namespace DnDSalesBot
             if (msg != null)
             {
 				LogMessage log;
-				if ((msg.HasCharPrefix(commandPrefix, ref argPos) || msg.HasMentionPrefix(client.CurrentUser, ref argPos)))
-                {
+				if ((msg.HasCharPrefix(commandPrefix, ref argPos))) // || msg.HasMentionPrefix(client.CurrentUser, ref argPos)
+				{
                     CommandContext context = new CommandContext(client, msg);
 					IResult result = await commands.ExecuteAsync(context, argPos, services);
 					if (!result.IsSuccess)
@@ -82,7 +82,7 @@ namespace DnDSalesBot
 
 					Console.WriteLine(log.ToString());
 				}
-            }
+			}
         }
 
         private async Task InstallCommands()
@@ -95,6 +95,8 @@ namespace DnDSalesBot
 			await commands.AddModuleAsync<AddItemModule>();
 			await commands.AddModuleAsync<AddPlayerModule>();
 			await commands.AddModuleAsync<HelpModule>();
+			await commands.AddModuleAsync<MakeDmModule>();
+			await commands.AddModuleAsync<GiveGoldModule>();
 			//await commands.AddModuleAsync<>();
 		}
 	}

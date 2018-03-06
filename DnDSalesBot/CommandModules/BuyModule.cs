@@ -9,6 +9,14 @@ namespace DnDSalesBot.CommandModules
 {
 	class BuyModule : ModuleBase
 	{
+		#region String Macros
+		private const string ITEM_BOUGHT = "[{0}]: {1} compro **{2}** por **{3}** 👑\nDinero Actual de {4}: {5}👑";
+		private const string NOT_ENOUGH_GOLD = "{0} no posee suficientes 👑 para realizar la compra";
+		private const string ITEM_NOT_FOUND = "No se encontro el item";
+		private const string ITEM_NOT_FOUND_DM = "No se encontro el item: **{0}**\nPara añadir utilice el comando addItem";
+		#endregion
+
+		#region Commands
 		[Command("buy"), Summary("Compra un item listado en la base de datos")]
 		public async Task BuyItem([Remainder]string itemName)
 		{
@@ -16,31 +24,42 @@ namespace DnDSalesBot.CommandModules
 			Item item = Item.GetFromDatabase(itemName);
 			Player buyer = Player.GetFromDatabase(Context.User.DiscriminatorValue);
 
-			//Get the DM channel from the App.Config
-			ulong.TryParse(ConfigurationManager.AppSettings["dmChannel"], out ulong dmChannel);
+			//Get the DM channel from the App.Config and if you can't then throw an exception signalling to check app.config
+			if(!ulong.TryParse(ConfigurationManager.AppSettings["dmChannel"], out ulong dmChannel))
+				throw new Exception(Utilities.BAD_CONFIG);
 
 			if (buyer != null)
 			{
 				if (item != null)
 				{
-					//Format the Reply
-					reply = String.Format("[{0}]: {1} compro **{2}** por **{3}** :crown:", shortDate, Context.User.Mention, item.ItemName, item.ItemPrice);
+					if (buyer.Character.CurrentGold >= item.ItemPrice)
+					{
+						if (buyer.AddGold(-item.ItemPrice))
+						{
+							//Format the Reply
+							reply = String.Format(ITEM_BOUGHT
+													, shortDate
+													, Context.User.Mention
+													, item.ItemName
+													, item.ItemPrice
+													, Context.User.Mention
+													, buyer.Character.CurrentGold);
 
-					if (dmChannel != 0)
-						//if the DM channel was parsed successfully then reply to the DM channel
-						Utilities.SendMessageAsync(Context, dmChannel, reply);
+							Utilities.SendMessageAsync(Context, dmChannel, reply);
+							Utilities.SendMessageAsync(Context, buyer.JournalId, reply);
+
+							await ReplyAsync(reply);
+						}
+						else
+							await ReplyAsync(Utilities.UPDATE_FAILED);
+					}
 					else
-						//if not then throw an exception
-						throw new Exception("bad configuration format please check App.Config");
-
-					Utilities.SendMessageAsync(Context, buyer.JournalId, reply);
-
-					await ReplyAsync(reply);
+						await ReplyAsync(String.Format(NOT_ENOUGH_GOLD, Context.User.Mention));
 				}
 				else
 				{
-					reply = String.Format("[{0}]: El item solicitado no se encontro en la Base de Datos", shortDate);
-					string replyDm = String.Format("[{0}]: No se encontro el item: **{1}**\nPara añadir utilice el comando addItem", shortDate, itemName);
+					reply = String.Format(ITEM_NOT_FOUND);
+					string replyDm = String.Format(ITEM_NOT_FOUND_DM, itemName);
 
 					if (dmChannel != 0)
 						Utilities.SendMessageAsync(Context, dmChannel, replyDm);
@@ -49,16 +68,8 @@ namespace DnDSalesBot.CommandModules
 				}
 			}
 			else
-			{
-				reply = String.Format("[{0}]: No se encontro al jugador solicitado", shortDate);
-				String replyDm = String.Format("[{0}]: No se encontro al jugador: **{1}**\nPara añadir utilice el comando addPlayer", shortDate, Context.User.Mention);
-
-				if (dmChannel != 0)
-					Utilities.SendMessageAsync(Context, dmChannel, replyDm);
-
-				await ReplyAsync(reply);
-			}
-
+				Utilities.ReportPlayerNotFound(Context, Context.User.Mention);
 		}
+		#endregion
 	}
 }

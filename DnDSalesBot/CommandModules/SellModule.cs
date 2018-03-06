@@ -8,57 +8,56 @@ namespace DnDSalesBot.CommandModules
 {
     class SellModule : ModuleBase
 	{
-        [Command("sell"), Summary("Vende un item listado en la base de datos")]
-        public async Task SellItem(string itemName)
+		#region String Macros
+		private const string ITEM_SOLD = "[{0}]: {1} Vendio **{2}** por **{3}** 👑\nDinero Actual de {4}: {5}👑";
+		private const string ITEM_NOT_FOUND = "No se encontro el item";
+		private const string ITEM_NOT_FOUND_DM = "No se encontro el item: **{0}**\nPara añadir utilice el comando addItem";
+		#endregion
+
+		#region Commands
+		[Command("sell"), Summary("Vende un item listado en la base de datos")]
+		public async Task SellItem([Remainder]string itemName)
         {
             Item itemSold = Item.GetFromDatabase(itemName);
             Player seller = Player.GetFromDatabase(Context.User.DiscriminatorValue);
             String reply = String.Empty, shortDate = DateTime.Now.ToShortDateString();
 
-            ulong.TryParse(ConfigurationManager.AppSettings["dmChannel"], out ulong dmChannel);
+            if(!ulong.TryParse(ConfigurationManager.AppSettings["dmChannel"], out ulong dmChannel))
+				throw new Exception(Utilities.BAD_CONFIG);
 
 			if (seller != null)
 			{
 				if (itemSold != null)
 				{
-					reply = String.Format("[{0}]: {1} Vendio **{2}** por **{3}** Coronas", shortDate, Context.User.Mention, itemSold.ItemName, itemSold.ItemPrice);
+					if(seller.AddGold(itemSold.ItemPrice))
+					{ 
+						reply = String.Format(ITEM_SOLD
+												,shortDate
+												,Context.User.Mention
+												,itemSold.ItemName
+												,itemSold.ItemPrice
+												,Context.User.Mention
+												,seller.Character.CurrentGold);
 
-					if (dmChannel != 0)
-						//if the DM channel was parsed successfully then reply to the DM channel
 						Utilities.SendMessageAsync(Context, dmChannel, reply);
-					else
-						//if not then throw an exception
-						throw new Exception("bad configuration format please check App.Config");
-
-					Utilities.SendMessageAsync(Context, seller.JournalId, reply);
-					//TODO: Log to database
-					await ReplyAsync(reply);
+						Utilities.SendMessageAsync(Context, seller.JournalId, reply);
+						//TODO: Log to database
+						await ReplyAsync(reply);
+					}
 				}
 				else
 				{
-					reply = String.Format("[{0}]: El item solicitado no se encontro en la Base de Datos", shortDate);
-					string replyDm = String.Format("[{0}]: No se encontro el item: **{1}**\nPara añadir utilice el comando addItem", shortDate, itemName);
+					string replyDm = String.Format(ITEM_NOT_FOUND_DM, itemName);
 
 					if (dmChannel != 0)
 						Utilities.SendMessageAsync(Context, dmChannel, replyDm);
 
-					await ReplyAsync(reply);
-					//TODO: Log to database
+					await ReplyAsync(ITEM_NOT_FOUND);
 				}
 			}
 			else
-			{
-				reply = String.Format("[{0}]: No se encontro al jugador solicitado", shortDate);
-				String replyDm = String.Format("[{0}]: No se encontro al jugador: **{1}**\nPara añadir utilice el comando addPlayer",shortDate, Context.User.Mention);
-
-				if (dmChannel != 0)
-					Utilities.SendMessageAsync(Context, dmChannel, replyDm);
-
-				await ReplyAsync(reply);
-			}
-
-			//await ReplyAsync("WIP");
+				Utilities.ReportPlayerNotFound(Context, Context.User.Mention);
 		}
-
-    }
+		#endregion
+	}
 }

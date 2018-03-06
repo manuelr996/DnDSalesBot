@@ -146,13 +146,43 @@ namespace DnDSalesBot.Data_Access_Layer
 			string sql = "Update Players Set isDm = @isDm where playerDiscriminator like @playerDiscriminator";
 
 			SQLiteCommand command = new SQLiteCommand(sql, connection);
+			command.Parameters.Add(dmFlag);
+			command.Parameters.Add(discriminator);
 
 			try
 			{
 				connection.Open();
 				result = (command.ExecuteNonQuery() >= 1 ? true : false);
 			}
-			catch(SQLiteException e)
+			catch (SQLiteException e)
+			{
+				connection.Close();
+				throw new Exception(e.Message);
+			}
+
+			return result;
+		}
+
+		public bool UpdateGold(double moneyAmount, ushort playerDiscriminator)
+		{
+			bool result;
+			SQLiteParameter dmFlag = new SQLiteParameter("@moneyAmount");
+			SQLiteParameter discriminator = new SQLiteParameter("@playerDiscriminator");
+			dmFlag.Value = moneyAmount;
+			discriminator.Value = Convert.ToInt32(playerDiscriminator);
+
+			string sql = "Update Players Set currentGold = currentGold + @moneyAmount where playerDiscriminator like @playerDiscriminator";
+
+			SQLiteCommand command = new SQLiteCommand(sql, connection);
+			command.Parameters.Add(dmFlag);
+			command.Parameters.Add(discriminator);
+
+			try
+			{
+				connection.Open();
+				result = (command.ExecuteNonQuery() >= 1 ? true : false);
+			}
+			catch (SQLiteException e)
 			{
 				connection.Close();
 				throw new Exception(e.Message);
