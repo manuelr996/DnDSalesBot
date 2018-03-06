@@ -20,6 +20,7 @@ namespace DnDSalesBot.CommandModules
 			await _service.AddModuleAsync<AddPlayerModule>();
 			await _service.AddModuleAsync<HelpModule>();
 			await _service.AddModuleAsync<MakeDmModule>();
+			await _service.AddModuleAsync<GiveGoldModule>();
 		}
 		#endregion
 
