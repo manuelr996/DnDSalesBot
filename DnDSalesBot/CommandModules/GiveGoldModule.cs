@@ -10,8 +10,8 @@ namespace DnDSalesBot.CommandModules
 {
     class GiveGoldModule : ModuleBase
     {
-		private const string GOLD_GIVEN = "[{0}]: se le otorgó **{1}** 👑 a **{2}**";
-		[Command("givegold"), Summary("Da una cierta cantidad de coronas a un jugador")]
+		private const string GOLD_GIVEN = "[{0}]: se le otorgó **{1}** 👑 a **{2}**\nDinero actual de {3}: {4} 👑";
+		[Command("givegold"), Summary("Da una cierta cantidad de coronas a un jugador (Solo DM)")]
 		public async Task GiveMoney(IGuildUser moneyRecipient, double goldAmount)
 		{
 			Player recipientPlayer = Player.GetFromDatabase(moneyRecipient.DiscriminatorValue);
@@ -29,7 +29,7 @@ namespace DnDSalesBot.CommandModules
 					{
 						if (recipientPlayer.AddGold(goldAmount))
 						{
-							string reply = String.Format(GOLD_GIVEN, shortTime, goldAmount, moneyRecipient.Mention);
+							string reply = String.Format(GOLD_GIVEN, shortTime, goldAmount, moneyRecipient.Mention,moneyRecipient.Mention,recipientPlayer.Character.CurrentGold);
 
 							await ReplyAsync(reply);
 							Utilities.SendMessageAsync(Context, dmChannel, reply);

@@ -50,6 +50,17 @@ namespace DnDSalesBot.Object_Layer
 			return result;
 		}
 
+		public bool SetCharacterName(string characterName)
+		{
+			DatabaseHandler db = new DatabaseHandler();
+			bool result;
+
+			if (result = db.UpdateCharacterName(characterName, Discriminator))
+				Character.Name = characterName;
+
+			return result;
+		}
+
 		#region Static Methods
 		public static Player GetFromDatabase(ushort descriptor)
 		{

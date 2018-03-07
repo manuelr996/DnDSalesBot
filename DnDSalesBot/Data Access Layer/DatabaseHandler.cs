@@ -190,6 +190,36 @@ namespace DnDSalesBot.Data_Access_Layer
 
 			return result;
 		}
+
+		public bool UpdateCharacterName(string characterName, ushort playerDiscriminator)
+		{
+			bool result;
+
+			SQLiteParameter newName = new SQLiteParameter("@characterName");
+			SQLiteParameter discriminator = new SQLiteParameter("@playerDiscriminator");
+
+			newName.Value = characterName;
+			discriminator.Value = Convert.ToInt32(playerDiscriminator);
+
+			string sql = "Update Players Set characterName = @characterName where playerDiscriminator like @playerDiscriminator";
+
+			SQLiteCommand command = new SQLiteCommand(sql, connection);
+			command.Parameters.Add(newName);
+			command.Parameters.Add(discriminator);
+			
+			try
+			{
+				connection.Open();
+				result = (command.ExecuteNonQuery() >= 1 ? true : false);
+			}
+			catch(SQLiteException e)
+			{
+				connection.Close();
+				throw e;
+			}
+
+			return result;
+		}
 		#endregion
 	}
 }

@@ -8,7 +8,7 @@ namespace DnDSalesBot.CommandModules
     class Utilities
     {
 		#region String Macros
-		public const string PLAYER_NOT_FOUND = "No se encontro al/los jugador/es solicitado/s";
+		public const string PLAYER_NOT_FOUND = "{0} No existe en la base de datos";
 		public const string PLAYER_NOT_FOUND_DM = "No se encontro al jugador: **{0}**\nPara añadir utilice el comando addPlayer";
 		public const string BAD_CONFIG = "Hay errores en App.Config";
 		public const string INSUFFICIENT_RIGHTS = "No se poseen permisos para realizar la operacion";
@@ -27,12 +27,13 @@ namespace DnDSalesBot.CommandModules
 			if (!ulong.TryParse(ConfigurationManager.AppSettings["dmChannel"], out ulong dmChannel))
 				throw new Exception(BAD_CONFIG);
 
+			String reply = String.Format(PLAYER_NOT_FOUND, mention);
 			String replyDm = String.Format(PLAYER_NOT_FOUND_DM, mention);
 
 			if (dmChannel != 0)
 				SendMessageAsync(Context, dmChannel, replyDm);
 
-			SendMessageAsync(Context, Context.Channel.Id, PLAYER_NOT_FOUND);
+			SendMessageAsync(Context, Context.Channel.Id, reply);
 		}
 	}
 }
